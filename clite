@@ -1,0 +1,54 @@
+#!/usr/bin/python3
+"""
+CS 364 Programming Languages
+Author: Vela Dimitrova Mineva
+Date: 04/08/2015
+"""
+import sys
+import os
+
+import errors
+try:
+    from parser import Parser
+except ImportError:
+    sys.stdout.write("Unable to import Parser from the parser module\n")
+    sys.exit(0)
+
+
+def display_usage():
+    """
+    A function that dislays information about running parser
+    :return: None
+    """
+    sys.stdout.write("Usage: ./{0} FILENAME".format(os.path.basename(__file__)))
+
+
+def get_arguments():
+    """
+    A function that parses command line arguments given by the user and returns
+    a filename. If missing or unsupported arguments are given a message is
+    displayed and the program is terminated.
+    :return: type(filename) is string
+    """
+    if len(sys.argv) != 2:
+        display_usage()
+        sys.stdout.write("\n{0} takes 2 arguments ({1} given)!\n".
+                         format(os.path.basename(__file__), len(sys.argv)))
+        sys.exit(0)
+    return sys.argv[1]
+
+if __name__ == '__main__':
+
+    # Get name of the file that needs to be processed
+    filename = get_arguments()
+    # Create a lexer object
+    Clite_parser = Parser(filename)
+    try:
+        tree = Clite_parser.parse()
+    except errors.CliteSyntaxError as e:
+        print(e)
+        sys.exit(0)
+    else:
+        print("Evaluating {0}...".format(filename))
+        tree.eval()
+        print("Done!")
