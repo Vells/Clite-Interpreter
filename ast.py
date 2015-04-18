@@ -61,8 +61,8 @@ class Program(object):
     def eval(self):
         """
         A method that evaluates all statements in the Program object.
-        If a CliteTypeError or a CliteRuntimeError exception is caught,
-        the corresponding error message is printed and the program is terminated.
+        If a CliteTypeError or a CliteRuntimeError exception is caught, the
+        corresponding error message is printed and the program is terminated.
         :return None
         """
         try:
@@ -144,7 +144,7 @@ class WhileStatement(Statement):
         :return: type - string
         """
         spaces = Program.INDENT_SIZE * self.level * ' '
-        string = "\n{0}while ({1}){2}".\
+        string = "\n{0}while ({1}){2}". \
             format(spaces, self.expression.__str__(),
                    self.statement.__str__())
         return string
@@ -176,7 +176,7 @@ class PrintStatement(Statement):
         :return: type - string
         """
         spaces = Program.INDENT_SIZE * self.level * ' '
-        string = "\n{0}print({1});".\
+        string = "\n{0}print({1});". \
             format(spaces, self.expression.__str__())
         return string
 
@@ -309,23 +309,6 @@ class BinaryExpression(Expression):
         return "{0} {1} {2}".format(self.left.__str__(), operator,
                                     self.right.__str__())
 
-    def type(self):
-        """
-        A method that returns the type of Clite value of a Binary Expression
-        :return: string
-        """
-        left_type = self.left.type()
-        right_type = self.right.type()
-
-        if left_type == "bool" or right_type == "bool":
-            raise errors.CliteTypeError("Incompatible types")
-        if left_type == "float" and right_type == "int":
-            return "float"
-        elif left_type == "int" and right_type == "float":
-            return "float"
-        else:
-            return left_type
-
     def validate_boolean_expression(self):
         """
         A method that checks if a binary expression
@@ -371,7 +354,51 @@ class BinaryExpression(Expression):
         return True
 
 
-class Conjunction(BinaryExpression):
+class BinaryBoolExpression(BinaryExpression):
+    """
+    A class that represents a binary boolean expression.
+    Inherits the BinaryExpression base class.
+    """
+
+    def type(self):
+        """
+        A method that returns the type of Clite value of a Binary Expression
+        :return: string
+        """
+        left_type = self.left.type()
+        right_type = self.right.type()
+
+        if left_type == tokens.BOOL or right_type == tokens.BOOL:
+            raise errors.CliteTypeError("Incompatible types")
+        else:
+            return tokens.BOOL
+
+
+class BinaryNumericalExpression(BinaryExpression):
+    """
+    A class that represents a binary numerical expression.
+    Inherits the BinaryExpression base class.
+    """
+
+    def type(self):
+        """
+        A method that returns the type of Clite value of a Binary Expression
+        :return: string
+        """
+        left_type = self.left.type()
+        right_type = self.right.type()
+
+        if left_type == "bool" or right_type == "bool":
+            raise errors.CliteTypeError("Incompatible types")
+        if left_type == "float" and right_type == "int":
+            return "float"
+        elif left_type == "int" and right_type == "float":
+            return "float"
+        else:
+            return left_type
+
+
+class Conjunction(BinaryBoolExpression):
     """
     A class that represents a conjunction expression.
     Inherits the Expression base class.
@@ -396,7 +423,7 @@ class Conjunction(BinaryExpression):
         return self.left.eval() or self.right.eval()
 
 
-class Equality(BinaryExpression):
+class Equality(BinaryBoolExpression):
     """
     A class that represents an equality relation expression.
     Inherits the Expression base class.
@@ -421,7 +448,7 @@ class Equality(BinaryExpression):
         return self.left.eval() and self.right.eval()
 
 
-class BinaryEqualOpExpression(BinaryExpression):
+class BinaryEqualOpExpression(BinaryBoolExpression):
     """
     A class that represents a binary equal operation expression.
     Inherits the BinaryExpression base class.
@@ -446,7 +473,7 @@ class BinaryEqualOpExpression(BinaryExpression):
         return self.left.eval() == self.right.eval()
 
 
-class BinaryNotEqualOpExpression(BinaryExpression):
+class BinaryNotEqualOpExpression(BinaryBoolExpression):
     """
     A class that represents a binary not equal operation expression.
     Inherits the BinaryExpression base class.
@@ -470,7 +497,7 @@ class BinaryNotEqualOpExpression(BinaryExpression):
         return self.left.eval() != self.right.eval()
 
 
-class BinaryLessExpression(BinaryExpression):
+class BinaryLessExpression(BinaryBoolExpression):
     """
     A class that represents a binary less relation expression.
     Inherits the BinaryExpression base class.
@@ -494,7 +521,7 @@ class BinaryLessExpression(BinaryExpression):
         return self.left.eval() < self.right.eval()
 
 
-class BinaryLessEqualExpression(BinaryExpression):
+class BinaryLessEqualExpression(BinaryBoolExpression):
     """
     A class that represents a binary less or equal relation expression.
     Inherits the BinaryExpression base class.
@@ -518,7 +545,7 @@ class BinaryLessEqualExpression(BinaryExpression):
         return self.left.eval() <= self.right.eval()
 
 
-class BinaryGreaterExpression(BinaryExpression):
+class BinaryGreaterExpression(BinaryBoolExpression):
     """
     A class that represents a binary greater relation expression.
     Inherits the BinaryExpression base class.
@@ -542,7 +569,7 @@ class BinaryGreaterExpression(BinaryExpression):
         return self.left.eval() > self.right.eval()
 
 
-class BinaryGreaterEqualExpression(BinaryExpression):
+class BinaryGreaterEqualExpression(BinaryBoolExpression):
     """
     A class that represents a binary greater or equal relation expression.
     Inherits the BinaryExpression base class.
@@ -550,7 +577,8 @@ class BinaryGreaterEqualExpression(BinaryExpression):
 
     def __str__(self):
         """
-        Return the string representation of a BinaryGreaterEqualExpression object
+        Return the string representation of a
+        BinaryGreaterEqualExpression object
         :return: type - string
         """
         return super().str(tokens.GREATER_EQ)
@@ -566,7 +594,7 @@ class BinaryGreaterEqualExpression(BinaryExpression):
         return self.left.eval() >= self.right.eval()
 
 
-class BinaryAddOpExpression(BinaryExpression):
+class BinaryAddOpExpression(BinaryNumericalExpression):
     """
     A base class that represents a binary addition operation expression.
     Inherits the BinaryExpression base class.
@@ -623,7 +651,7 @@ class BinaryMinusExpression(BinaryAddOpExpression):
         return self.left.eval() - self.right.eval()
 
 
-class BinaryTimesExpression(BinaryExpression):
+class BinaryTimesExpression(BinaryNumericalExpression):
     """
     A class that represents a binary times operation expression.
     Inherits the BinaryExpression base class.
@@ -647,7 +675,7 @@ class BinaryTimesExpression(BinaryExpression):
         return self.left.eval() * self.right.eval()
 
 
-class BinaryDivideExpression(BinaryExpression):
+class BinaryDivideExpression(BinaryNumericalExpression):
     """
     A class that represents a binary divide operation expression.
     Inherits the BinaryExpression base class.
@@ -671,7 +699,7 @@ class BinaryDivideExpression(BinaryExpression):
         return self.left.eval() / self.right.eval()
 
 
-class BinaryModExpression(BinaryExpression):
+class BinaryModExpression(BinaryNumericalExpression):
     """
     A class that represents a binary mod operation expression.
     Inherits the BinaryExpression base class.
@@ -695,7 +723,7 @@ class BinaryModExpression(BinaryExpression):
         return self.left.eval() % self.right.eval()
 
 
-class BinaryExpExpression(BinaryExpression):
+class BinaryExpExpression(BinaryNumericalExpression):
     """
     A class that represents a binary exponentiation operation expression.
     Inherits the BinaryExpression base class.
@@ -703,14 +731,15 @@ class BinaryExpExpression(BinaryExpression):
 
     def __str__(self):
         """
-        Return the string representation of a BinaryExponentiationExpression object
+        Return the string representation of a
+        BinaryExponentiationExpression object
         :return: type - string
         """
         return "({0} {1} {2})".format(self.left.__str__(), tokens.EXPONENT,
                                       self.right.__str__())
 
     def eval(self):
-        """
+        """i < n / 2
         A method that evaluates a binary exponentiation expression
         :return an evaluated expression of the same type as the terms
         :raise CliteTypeError raised when an operation is applied to an
@@ -762,9 +791,9 @@ class Factor(Expression):
 
         primary_type = self.primary.type()
 
-        if (self.unary_operator != tokens.NOT and primary_type == tokens.BOOL) or\
-           (self.unary_operator == tokens.NOT and primary_type != tokens.BOOL):
-            message = "The operator {0} is undefined for the argument type(s) {1}".\
+        if (self.unary_operator != tokens.NOT and primary_type == tokens.BOOL) or \
+                (self.unary_operator == tokens.NOT and primary_type != tokens.BOOL):
+            message = "The operator {0} is undefined for the argument type(s) {1}". \
                 format(self.unary_operator, primary_type)
             raise errors.CliteRuntimeError(message, self.line_number)
 
